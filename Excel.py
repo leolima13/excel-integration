@@ -4,21 +4,34 @@ import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
-date_today = datetime.today().strftime('%d/%m/%Y')
 
-df_escala = pd.read_excel('Escala.xlsx', index_col=0)
-workers = df_escala.loc['Marcos'][date_today]
+def get_schedule_from_excel(diretory_excel, worksheet, date_to_check):
+    '''
+    Função que retorna a escala de cada colaborador na data inserida.
 
-dict_schedule = {}
+    :param diretory_excel: diretório do arquivo excel com a escala
+    :param date_to_check: data para a verificação da escala. Formato dd/mm/yy
+    :return: dicionário com a escala de cada colaborador
+    '''
+    df_escala = pd.read_excel(diretory_excel, worksheet, index_col=0)
 
-for colaborador in df_escala.index:
-    status = df_escala.loc[colaborador][date_today]
-    dict_schedule[colaborador] = status
+    dict_schedule = {}
 
-print(dict_schedule)
+    for colaborador in df_escala.index:
+        status = df_escala.loc[colaborador][date_to_check]
+        dict_schedule[colaborador] = status
+
+    return dict_schedule
 
 
-def send_email(dict_escala, date_to_insert):
+def send_email(date_to_insert, schedule):
+    '''
+    Função que envia o e-mail com a escala dos colaboradores
+    :param date_to_insert: data que será usada no corpo do e-mail
+    :param schedule: dicionário com a escala de cada colaborador
+    :return: e-mail é enviado e não há nenhum retorno da função
+    '''
+
     username = "le052437@intelbras.com.br"
     password = "Asadew12w1"
     mail_from = "le052437@intelbras.com.br"
@@ -37,13 +50,14 @@ def send_email(dict_escala, date_to_insert):
     </head>
     <body>
     <p>Bom dia,</p>
-    <p>Segue a seguir a escala programada da equipe para hoje {date}:</p>
+    <p>Segue a escala programada da equipe para hoje {date}:</p>
     <h2>Controle de Escala</h2>    
     <table border="1">
     <tr>
         <td> Nome </td>
         <td> Escala </td>        
-    </tr>
+    </tr>   
+        
     <tr>
         <td> {colaborador1} </td>
         <td> {status_colaborador1} </td>        
@@ -109,35 +123,34 @@ def send_email(dict_escala, date_to_insert):
     </body>
     </html>
         """.format(date=date_to_insert,
-                   escala=dict_escala,
                    colaborador1="Stefany",
-                   status_colaborador1=dict_schedule["Stefany"],
+                   status_colaborador1=schedule["Stefany"],
                    colaborador2="Marcos",
-                   status_colaborador2=dict_schedule["Marcos"],
+                   status_colaborador2=schedule["Marcos"],
                    colaborador3="Ana",
-                   status_colaborador3=dict_schedule["Ana"],
+                   status_colaborador3=schedule["Ana"],
                    colaborador4="Mendonça",
-                   status_colaborador4=dict_schedule["Mendonça"],
+                   status_colaborador4=schedule["Mendonça"],
                    colaborador5="Ruth",
-                   status_colaborador5=dict_schedule["Ruth"],
+                   status_colaborador5=schedule["Ruth"],
                    colaborador6="Gabriel",
-                   status_colaborador6=dict_schedule["Gabriel"],
+                   status_colaborador6=schedule["Gabriel"],
                    colaborador7="Gustavo",
-                   status_colaborador7=dict_schedule["Gustavo"],
+                   status_colaborador7=schedule["Gustavo"],
                    colaborador8="Maykon",
-                   status_colaborador8=dict_schedule["Maykon"],
+                   status_colaborador8=schedule["Maykon"],
                    colaborador9="Maitê",
-                   status_colaborador9=dict_schedule["Maitê"],
+                   status_colaborador9=schedule["Maitê"],
                    colaborador10="Guilherme",
-                   status_colaborador10=dict_schedule["Guilherme"],
+                   status_colaborador10=schedule["Guilherme"],
                    colaborador11="Elionai",
-                   status_colaborador11=dict_schedule["Elionai"],
+                   status_colaborador11=schedule["Elionai"],
                    colaborador12="Priscila",
-                   status_colaborador12=dict_schedule["Priscila"],
+                   status_colaborador12=schedule["Priscila"],
                    colaborador13="Leo",
-                   status_colaborador13=dict_schedule["Leo"],
+                   status_colaborador13=schedule["Leo"],
                    colaborador14="Lucas Ribas",
-                   status_colaborador14=dict_schedule["Lucas Ribas"],
+                   status_colaborador14=schedule["Lucas Ribas"],
                    )
 
     # Turn these into plain/html MIMEText objects
@@ -152,4 +165,8 @@ def send_email(dict_escala, date_to_insert):
     connection.quit()
 
 
-send_email(dict_schedule, date_today)
+# Início do programa
+date_today = datetime.today().strftime('%d/%m/%Y')
+
+schedule = get_schedule_from_excel('Escala.xlsx', '456', date_today)
+send_email(date_today, schedule)
